@@ -1,8 +1,14 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import { GrMoney } from 'react-icons/gr';
 
 function App() {
   const [bankAccounts,setBankAccounts] = useState(null);
+
+  const clientId = "W3iQzbLyZ5kA76SVkEYl7UOm42Y8mEgkeFZrK_WuafY=";
+  const clientSecret = "Iz8rPlJLAyiMngfrILU1w5iUJUlcnANNJX-uuviJQw8=";
+
+  const accountList = [];
 
   async function fetchBackendData() {
     const response = await fetch('api/bankAccounts');
@@ -17,8 +23,8 @@ function App() {
 
     var urlencoded = new URLSearchParams();
     urlencoded.append("grant_type", "client_credentials");
-    urlencoded.append("client_id", "W3iQzbLyZ5kA76SVkEYl7UOm42Y8mEgkeFZrK_WuafY=");
-    urlencoded.append("client_secret", "Iz8rPlJLAyiMngfrILU1w5iUJUlcnANNJX-uuviJQw8=");
+    urlencoded.append("client_id", clientId);
+    urlencoded.append("client_secret", clientSecret);
     urlencoded.append("scope", "accounts");
 
     var requestOptions = {
@@ -73,9 +79,26 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <p>Hello World</p>
-      </header>
+      <OepfelbaumHeader/>
+      <TotalAssets accountList={accountList}/>
+    </div>
+  );
+}
+
+
+function TotalAssets(accountList) {
+  return(
+    <div className='Total-assets'>
+      <GrMoney size={30}/>
+      <div>100000</div>
+    </div>
+  );
+}
+
+function OepfelbaumHeader() {
+  return(
+    <div className="Oepfelbaum-header">
+      <div>Oepfelbaum | Digitales Portemonnaie</div>
     </div>
   );
 }
