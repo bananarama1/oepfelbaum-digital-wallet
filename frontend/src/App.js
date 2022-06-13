@@ -2,11 +2,12 @@ import './App.css';
 import { useEffect, useState } from 'react';
 
 function App() {
-  const [bankAccounts,setBankAccounts] = useState([{}]);
+  const [bankAccounts,setBankAccounts] = useState(null);
 
   async function fetchBackendData() {
     const response = await fetch('api/bankAccounts');
     const body = await response.json();
+    console.log(body);
     setBankAccounts(body);
   }
 
@@ -26,18 +27,48 @@ function App() {
       body: urlencoded,
       redirect: 'manual'
     };
-    var token;
-    const response = fetch("token", requestOptions)
-      .then(response => response.json())
-      .then(result => token = result)
-      .catch(error => console.log('error', error));
-    console.log(token);
-
+    const response = await fetch("token", requestOptions);
+    const body = await response.json();
+    console.log(body);
+    return body;
   }
 
+  async function postAccountRequest(accountAccessToken) {
+
+    const authorizationString = accountAccessToken.token_type + ' ' + accountAccessToken.access_token;
+
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", authorizationString);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      "Data": {
+        "Permissions": [
+          "ReadAccountsDetail",
+          "ReadBalances",
+          "ReadTransactionsCredits",
+          "ReadTransactionsDebits",
+          "ReadTransactionsDetail"
+        ]
+      },
+      "Risk": {}
+    });
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'manual'
+    };
+    const response = await fetch("open-banking/v3.1/aisp/account-access-consents", requestOptions);
+    const body = await response.json();
+    console.log(body);
+    return body;
+  }
+
+
   useEffect(() => {
-    fetchBackendData();
-    fetchNatwestAccountAccessToken();
+    fetchBackendData().then(fetchNatwestAccountAccessToken).then(postAccountRequest);
   }, []);
 
   return (

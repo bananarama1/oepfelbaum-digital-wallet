@@ -9,7 +9,7 @@ module.exports = function(app) {
     })
   );
   app.use(
-    ['/natwest', '/token'],
+    ['/open-banking', '/token'],
     createProxyMiddleware({
       target: 'https://ob.sandbox.natwest.com',
       changeOrigin: true
