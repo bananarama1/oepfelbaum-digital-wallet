@@ -16,10 +16,11 @@ module.exports = function(app) {
     })
   );
   app.use(
-    '/search',
+    '/authorize',
     createProxyMiddleware({
-      target: 'https://www.google.com',
+      target: 'https://api.sandbox.natwest.com',
       changeOrigin: true
     })
   );
+  
 };
