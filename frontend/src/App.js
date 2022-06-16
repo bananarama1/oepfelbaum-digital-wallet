@@ -1,21 +1,20 @@
 import './App.css';
-import { useEffect} from 'react';
+import { useEffect, useState} from 'react';
 import { GrMoney } from 'react-icons/gr';
 
 function App() {
-  var bankAccounts;
+  const [bankAccounts, setBankAccounts] = useState([]);
   var natWestAuthorization;
 
   const clientId = "W3iQzbLyZ5kA76SVkEYl7UOm42Y8mEgkeFZrK_WuafY=";
   const clientSecret = "Iz8rPlJLAyiMngfrILU1w5iUJUlcnANNJX-uuviJQw8=";
 
-  const accountList = [];
 
   async function fetchBackendData() {
     const response = await fetch('api/bankAccounts');
     const body = await response.json();
     console.log(body);
-    bankAccounts = body;
+    setBankAccounts(body._embedded.bankAccounts);
   }
 
   async function fetchNatwestAccountAccessToken() {
@@ -128,7 +127,7 @@ function App() {
 
   async function listAccounts(token) {
     //TODO: method can not work since approveConsentProgrammatically is not working. For now this method returns a static accountList object
-    return {
+    const accountList = {
       "Data": {
           "Account": [
               {
@@ -169,45 +168,136 @@ function App() {
       "Meta": {
           "TotalPages": 1
       }
-  };
+    };
+    console.log(accountList);
+    return accountList;
   }
-
+  async function getAccountBalances(accountId) {
+    let balances;
+    if (accountId === '13efad7b-24f2-48ef-b524-d4951d25c7bd') {
+      balances = {
+        "Data": {
+            "Balance": [
+                {
+                    "AccountId": "13efad7b-24f2-48ef-b524-d4951d25c7bd",
+                    "CreditDebitIndicator": "Credit",
+                    "Type": "Expected",
+                    "DateTime": "2022-05-31T10:15:00.000Z",
+                    "Amount": {
+                        "Amount": "125680.92",
+                        "Currency": "GBP"
+                    }
+                },
+                {
+                    "AccountId": "13efad7b-24f2-48ef-b524-d4951d25c7bd",
+                    "CreditDebitIndicator": "Credit",
+                    "Type": "ForwardAvailable",
+                    "DateTime": "2022-05-31T10:15:00.000Z",
+                    "Amount": {
+                        "Amount": "125680.92",
+                        "Currency": "GBP"
+                    }
+                }
+            ]
+        },
+        "Links": {
+            "Self": "https://ob.sandbox.natwest.com/open-banking/v3.1/aisp/accounts/13efad7b-24f2-48ef-b524-d4951d25c7bd/balances"
+        },
+        "Meta": {
+            "TotalPages": 1
+        }
+      };
+    } else if(accountId === 'a91ec5ba-b0c2-40c2-8213-dea873a1fd12') {
+      balances = {
+        "Data": {
+            "Balance": [
+                {
+                    "AccountId": "a91ec5ba-b0c2-40c2-8213-dea873a1fd12",
+                    "CreditDebitIndicator": "Credit",
+                    "Type": "Expected",
+                    "DateTime": "2022-06-13T10:19:11.836Z",
+                    "Amount": {
+                        "Amount": "19601.40",
+                        "Currency": "GBP"
+                    }
+                },
+                {
+                    "AccountId": "a91ec5ba-b0c2-40c2-8213-dea873a1fd12",
+                    "CreditDebitIndicator": "Credit",
+                    "Type": "ForwardAvailable",
+                    "DateTime": "2022-06-13T10:19:11.836Z",
+                    "Amount": {
+                        "Amount": "19601.40",
+                        "Currency": "GBP"
+                    }
+                }
+            ]
+        },
+        "Links": {
+            "Self": "https://ob.sandbox.natwest.com/open-banking/v3.1/aisp/accounts/a91ec5ba-b0c2-40c2-8213-dea873a1fd12/balances"
+        },
+        "Meta": {
+            "TotalPages": 1
+        }
+      };
+    }
+    console.log(balances);
+    return balances;
+  
+  }
 
   useEffect(() => {
     fetchBackendData().then(fetchNatwestAccountAccessToken).then(postAccountRequest).then(approveConsentProgrammatically).then(exchangeCodeForAccessToken).then(listAccounts);
   }, []);
 
+  function AccountList(props) {
+    const accountItems = props.accountList.map((accountItem) => 
+      <AccountItem key={accountItem.accountIdentificationNumber} account={accountItem}/>
+    );
+    return(
+      <div>
+        {accountItems}
+      </div>
+    );
+  }
+  
+  function AccountItem(props) {
+    const account = props.account;
+    return(
+      <div>
+        {account.accountIdentificationNumber}
+      </div>
+    );
+  }
+  
+  function TotalAssets(accountList) {
+    return(
+      <div className='Total-assets'>
+        <GrMoney size={30}/>
+        <div>100000</div>
+      </div>
+    );
+  }
+  
+  function OepfelbaumHeader() {
+    return(
+      <div className="Oepfelbaum-header">
+        <div>Oepfelbaum | Digitales Portemonnaie</div>
+      </div>
+    );
+  }
+
+  
+
   return (
     <div className="App">
       <OepfelbaumHeader/>
-      <TotalAssets accountList={accountList}/>
+      <TotalAssets accountList={bankAccounts}/>
+      <AccountList accountList={bankAccounts}/>
     </div>
   );
 }
 
-function AccountList(accountList) {
-  return(
-    <div>
 
-    </div>
-  );
-}
-
-function TotalAssets(accountList) {
-  return(
-    <div className='Total-assets'>
-      <GrMoney size={30}/>
-      <div>100000</div>
-    </div>
-  );
-}
-
-function OepfelbaumHeader() {
-  return(
-    <div className="Oepfelbaum-header">
-      <div>Oepfelbaum | Digitales Portemonnaie</div>
-    </div>
-  );
-}
 
 export default App;
